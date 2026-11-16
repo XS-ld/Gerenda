@@ -1,0 +1,15 @@
+{
+  "name": "personal-profile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "个人档案 / 简历站点：前端展示 + 后台登录管理，零依赖 Node 服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
