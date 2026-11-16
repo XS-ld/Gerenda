@@ -1,220 +1,186 @@
-# 个人档案 · 简历站点
+# 个人档案 · GitHub Pages 静态版
 
-一个可以直接部署的个人简历 / 档案网站：前台是干净的简历页面，后台登录后可以增删改全部内容。
+一个部署在 GitHub Pages 上的个人简历 / 档案页，配一个纯浏览器的内容编辑器，不需要服务器，也不需要数据库。
 
-- 前台：`/`
-- 后台：`/admin`（登录后可编辑）
-- 技术栈：Node.js 原生 HTTP 服务 + 静态前端，**零第三方依赖**，不需要 `npm install`
-- 数据存储：本地 JSON 文件 `data/profile.json`，方便备份和迁移
+- 首页 `index.html` —— 简历展示
+- 编辑页 `edit.html` —— 增删改内容，导出 `data.json`
+- 数据 `data.json` —— 所有文字内容都在这里，改它就是改网站
 
 ---
 
-## 一、本地运行
+## 一、为什么是这样
 
-```bash
-node server.js
+GitHub Pages 只托管静态文件，不运行 Node 进程，所以没有「登录后台」这种东西可做。替代方案是把 GitHub 仓库本身当作后台：改内容 → 提交 → 网站更新。
+
+为了让你不用直接跟 JSON 搏斗，我做了一个浏览器端的编辑页。改动自动存在本机草稿里，改完导出 `data.json` 覆盖仓库里的同名文件即可。
+
+## 二、部署（修掉现在的 404）
+
+你现在访问 `guanggaohb.asia` 看到的是 GitHub Pages 的 404，说明域名指对了，但仓库里没有可发布的 `index.html`，或者发布源选错了目录。
+
+### 第 1 步：上传文件
+
+把本目录下**所有文件**传到仓库根目录（不要套一层文件夹）：
+
+```
+index.html
+edit.html
+data.json
+app.js
+editor.js
+style.css
+editor.css
+favicon.svg
+404.html
+CNAME
+.nojekyll
 ```
 
-打开 http://localhost:3000
+`.nojekyll` 是空文件，必须传，否则文件名以下划线开头的资源会被 Jekyll 吞掉。
 
-首次启动会自动生成：
+如果更习惯用 `docs/` 目录，也可以全部放进 `docs/`，后面发布源选 `/docs` 即可。
 
-- `data/auth.json` —— 管理员账号（密码 scrypt 加盐哈希存储）
-- `data/profile.json` —— 简历内容（带一份示例数据，直接改就行）
+### 第 2 步：设置发布源
 
-默认账号：
+仓库 → Settings → Pages：
 
-```
-用户名：admin
-密码：  admin888
-```
+- **Source**：选 `Deploy from a branch`
+- **Branch**：`main`，目录选 `/ (root)` 或 `/docs`
+- 保存，等 1\~2 分钟
 
-> 登录后请立刻点右上角「修改密码」改掉默认密码。修改成功后所有会话失效，需要重新登录。
+页面顶部出现 `Your site is live at ...` 就成功了。
 
-## 二、环境变量
+### 第 3 步：确认访问路径
 
-| 变量 | 默认值 | 说明 |
-| --- | --- | --- |
-| `PORT` | `3000` | 监听端口 |
-| `HOST` | `0.0.0.0` | 监听地址 |
-| `ADMIN_USER` | `admin` | 首次生成账号时的用户名 |
-| `ADMIN_PASSWORD` | `admin888` | 首次生成账号时的密码 |
-| `DATA_DIR` | `./data` | 数据文件目录，部署到容器时建议挂载 |
-| `COOKIE_SECURE` | 未设置 | 设为 `1` 时 Cookie 带 `Secure`（**全站 HTTPS 时必须开启**） |
+两种情形，别搞混：
 
-首次启动前设置，即可用自定义密码初始化：
+| 情形 | 地址 |
+|---|---|
+| 没绑自定义域名 | `https://用户名.github.io/仓库名/` |
+| 绑了 `guanggaohb.asia` | `https://guanggaohb.asia/` |
 
-```bash
-ADMIN_USER=me ADMIN_PASSWORD='换成你的密码' node server.js
-```
+**不要**访问 `https://guanggaohb.asia/仓库名/` —— 绑了自定义域名后，站点挂在域名根路径，`/Gerenda` 这种子路径不存在，这正是你之前看到 404 的直接原因。
 
-注意：`ADMIN_USER` / `ADMIN_PASSWORD` 只在**第一次**生成 `data/auth.json` 时生效；文件已存在时改环境变量不会改密码，请用后台的「修改密码」。
+### 第 4 步：自定义域名与 DNS
 
-## 三、部署
+`CNAME` 文件里已经写了 `guanggaohb.asia`。如果这不是你的域名，改成你自己的；不打算用自定义域名就直接删掉这个文件。
 
-### 方式 1：任意 Node 主机 + systemd
+DNS 要在域名服务商处配置（以根域名 `guanggaohb.asia` 为例）：
 
-```bash
-# 上传项目到服务器，例如 /var/www/resume
-cd /var/www/resume
-sudo mkdir -p /var/lib/resume
-sudo chown -R $USER /var/lib/resume
-```
+| 类型 | 主机记录 | 记录值 |
+|---|---|---|
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `用户名.github.io` |
 
-`/etc/systemd/system/resume.service`：
+四条 A 记录是 GitHub Pages 的官方地址，必须**全部**添加。如果之前只配了一两条，或者还残留别的 A 记录，就会解析到别处去。
 
-```ini
-[Unit]
-Description=Personal Profile Site
-After=network.target
+配好后回到 Settings → Pages，填 Custom domain 并勾选 **Enforce HTTPS**。证书签发通常要等几分钟到半小时。
 
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/var/www/resume
-ExecStart=/usr/bin/node /var/www/resume/server.js
-Environment=NODE_ENV=production
-Environment=PORT=3000
-Environment=DATA_DIR=/var/lib/resume
-Environment=COOKIE_SECURE=1
-Restart=always
-RestartSec=3
+> 如果域名之前绑定过别的服务，先在 DNS 里把旧记录清干净，再按上表重建。残留记录是「域名指向错误站点」的最常见原因。
 
-[Install]
-WantedBy=multi-user.target
-```
+## 三、日常怎么改内容
 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now resume
-sudo systemctl status resume
-```
+### 方式 A：用编辑页（推荐）
 
-### 方式 2：Docker
+1. 打开 `你的站点/edit.html`
+2. 改文字、点「+ 添加」加条目、点「删除」移除、用 ↑ ↓ 排序
+3. 改动会自动存进浏览器草稿，左侧底部会显示「草稿已保存在本机」
+4. 点右上角 **导出 data.json**，浏览器会下载一个 `data.json`
+5. 到仓库里用这个文件覆盖旧的 `data.json`，提交
 
-```bash
-docker build -t resume-site .
-docker run -d --name resume -p 3000:3000 \
-  -v $(pwd)/data:/app/data \
-  -e ADMIN_PASSWORD='换成你的密码' \
-  -e COOKIE_SECURE=1 \
-  resume-site
-```
+约一分钟站点就会更新。
 
-`-v` 必须挂载，否则容器重建会丢数据。
+注意几点：
 
-### 方式 3：云平台（Railway / Render / Fly.io / 宝塔等）
+- 编辑页是公开的，但它**改不了线上内容**，只影响你自己的浏览器。真正的写入动作是你在 GitHub 上的那次提交，所以不存在别人乱改的风险。
+- 草稿存在 `localStorage`，换浏览器、换手机、清缓存都会丢。改完记得导出。
+- 想从线上当前内容重新开始，点「放弃改动」。
+- 想粘贴别人给的 JSON，点「导入 JSON」。
 
-- 启动命令：`node server.js`
-- 端口：读取平台注入的 `PORT`
-- **注意磁盘持久化**：这类平台默认文件系统是临时的，必须挂载持久卷并把 `DATA_DIR` 指向挂载路径，否则重启后内容会回到初始状态。
+### 方式 B：直接改 data.json
 
-## 四、反向代理（Nginx）
+文件结构很直白：
 
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    # 强制 HTTPS（配好证书后去掉这段）
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name your-domain.com;
-
-    ssl_certificate     /etc/letsencrypt/live/your-domain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+```json
+{
+  "basic": {
+    "name": "张明",
+    "title": "前端工程师 · 5 年经验",
+    "summary": "空行分段",
+    "email": "", "phone": "", "city": "",
+    "website": "", "github": "", "avatar": ""
+  },
+  "education": [
+    { "id": "edu_1", "school": "", "degree": "", "major": "", "start": "", "end": "", "note": "" }
+  ],
+  "experience": [
+    { "id": "exp_1", "company": "", "role": "", "start": "", "end": "", "note": "每行一条" }
+  ],
+  "awards": [
+    { "id": "award_1", "title": "", "org": "", "date": "", "note": "" }
+  ],
+  "skills": [
+    { "id": "skill_1", "group": "语言", "items": "用顿号分隔" }
+  ],
+  "updatedAt": "2026-11-17T00:00:00.000Z"
 }
 ```
 
-走 HTTPS 时记得给服务加 `COOKIE_SECURE=1`。
+改的时候注意：
 
-## 五、怎么改内容
+- 每个条目的 `id` 必须唯一，随便起一个就行，比如 `award_4`
+- 字符串里的换行要写成 `\n`
+- JSON 最后一项后面不能有逗号
+- 改完可以用编辑页的「导入 JSON」先验证一下格式，能导入就说明合法
 
-登录 `/admin`，左侧切换分区：
+## 四、本地预览
 
-| 分区 | 内容 |
-| --- | --- |
-| 基本信息 | 姓名、职位、简介、邮箱、电话、城市、网站、GitHub、照片 |
-| 教育经历 | 学校、学历、专业、起止时间、说明 |
-| 工作经历 | 公司、职位、起止时间、工作内容（每行一条 → 前台显示成列表） |
-| 奖项与荣誉 | 奖项名称、颁发单位、时间、说明 |
-| 专业技能 | 分组名 + 条目 |
-
-- 工作经历 / 奖项 支持 ↑ ↓ 调整顺序
-- 删除会二次确认，不可撤销
-- 个人简介用**空行分段**，前台按段落显示
-
-## 六、备份与迁移
-
-内容全部在 `data/` 目录：
+`data.json` 是通过 `fetch` 读取的，直接双击 `index.html` 用 `file://` 打开会被浏览器拦截。起一个本地服务：
 
 ```bash
-tar czf resume-backup-$(date +%F).tar.gz data/
+# 在项目目录下
+python3 -m http.server 8080
 ```
 
-恢复：把 `data/` 放回项目根目录（或 `DATA_DIR` 指向的目录）再重启。
+然后访问 http://127.0.0.1:8080/
 
-也可以直接编辑 `data/profile.json`，格式很直白；改完重启服务生效。
+或者用 VS Code 的 Live Server 插件，效果一样。
 
-## 七、接口一览
+## 五、打印 / 导出 PDF
 
-公开：
+首页右下角「打印 / 存为 PDF」，已内置 A4 打印样式：去掉交互元素、避免条目跨页断裂。用来投简历可以直接打印。
 
-- `GET /api/profile` —— 全部简历数据
-- `GET /api/session` —— 当前登录状态
-
-需要登录（Cookie 会话）：
-
-- `POST /api/login` `{username, password}`
-- `POST /api/logout`
-- `POST /api/password` `{current, next}`
-- `PUT  /api/profile` `{basic: {...}}` —— 保存基本信息
-- `POST /api/{section}` —— 新增记录，`section` ∈ `education|experience|awards|skills`
-- `PUT  /api/{section}/{id}` —— 修改记录
-- `DELETE /api/{section}/{id}` —— 删除记录
-- `POST /api/{section}/{id}/move` `{direction: "up"|"down"}` —— 排序
-
-## 八、安全设计
-
-- 密码用 `scrypt` 加盐哈希存储，不落明文
-- 会话为随机 token + HttpOnly Cookie，12 小时滑动过期，服务重启后失效
-- 登录失败同一 IP 10 分钟内超过 10 次会被限流
-- 所有写接口都要登录；前端渲染统一做 HTML 转义，防止内容里插入脚本
-- 上传长度限制 256KB，字段长度在服务端二次校验
-
-单人维护的站点，这套强度足够。若要多人协作或对外提供注册，需另加用户体系。
-
-## 九、目录结构
+## 六、文件说明
 
 ```
-.
-├── server.js            # 后端：路由、鉴权、数据读写
-├── package.json
-├── Dockerfile
-├── public/
-│   ├── index.html       # 前台
-│   ├── style.css
-│   ├── app.js
-│   ├── admin.html       # 后台
-│   ├── admin.css
-│   ├── admin.js
-│   └── favicon.svg
-└── data/                # 运行时生成，注意备份
-    ├── profile.json
-    └── auth.json
+index.html      首页结构
+app.js          读取 data.json 并渲染
+style.css       首页样式（含移动端与打印样式）
+edit.html       编辑页结构
+editor.js       编辑、草稿、导入导出逻辑
+editor.css      编辑页样式
+data.json       全部内容
+favicon.svg     站点图标
+404.html        自定义 404 页
+CNAME           自定义域名
+.nojekyll       关闭 Jekyll 处理
 ```
 
-## 十、打印 / 导出 PDF
+## 七、设计说明
 
-前台右下角「打印 / 存为 PDF」，已内置 A4 打印样式：去掉交互元素、控制分页，直接打印或存 PDF 就是一份排版规整的简历。
+排版按纸面阅读来做：米白底、墨黑字、宋体姓名、单点砖红色强调，靠留白和细分隔线组织层级，不用渐变、卡片阴影和图标堆砌。
+
+想微调配色，改 `style.css` 顶部 `:root` 里的变量：
+
+```css
+--ink: #1b1c1e;      /* 主文字 */
+--muted: #8a857c;    /* 次要文字 */
+--line: #e0dcd2;     /* 分隔线 */
+--paper: #fbfaf8;    /* 背景 */
+--accent: #7c3b2c;   /* 强调色 */
+```
+
+字体也可以换，`--font-serif` 控制姓名那行，`--font-sans` 控制正文。

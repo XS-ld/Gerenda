@@ -1,4 +1,4 @@
-/* 前台：读取公开接口并渲染档案 */
+/* 前台：读取同目录 data.json 并渲染档案（纯静态，无后端） */
 
 (function () {
   'use strict';
@@ -14,8 +14,7 @@
 
   function period(start, end) {
     var parts = [start, end].filter(Boolean);
-    if (!parts.length) return '';
-    return parts.join(' – ');
+    return parts.length ? parts.join(' – ') : '';
   }
 
   function paragraphs(text) {
@@ -48,8 +47,8 @@
     if (basic.email) items.push('<li><a href="mailto:' + esc(basic.email) + '">' + esc(basic.email) + '</a></li>');
     if (basic.phone) items.push('<li>' + esc(basic.phone) + '</li>');
     if (basic.city) items.push('<li>' + esc(basic.city) + '</li>');
-    if (basic.website) items.push('<li><a href="' + esc(linkOf(basic.website)) + '" target="_blank" rel="noopener">' + esc(basic.website.replace(/^https?:\/\//, '')) + '</a></li>');
-    if (basic.github) items.push('<li><a href="' + esc(linkOf(basic.github)) + '" target="_blank" rel="noopener">' + esc(basic.github.replace(/^https?:\/\//, '')) + '</a></li>');
+    if (basic.website) items.push('<li><a href="' + esc(linkOf(basic.website)) + '" target="_blank" rel="noopener">' + esc(String(basic.website).replace(/^https?:\/\//, '')) + '</a></li>');
+    if (basic.github) items.push('<li><a href="' + esc(linkOf(basic.github)) + '" target="_blank" rel="noopener">' + esc(String(basic.github).replace(/^https?:\/\//, '')) + '</a></li>');
     return items.length ? '<ul class="contact">' + items.join('') + '</ul>' : '';
   }
 
@@ -151,7 +150,7 @@
       '<span>' + (updated ? '最后更新：' + esc(updated) : '') + '</span>' +
       '<span class="footer-actions no-print">' +
         '<button type="button" class="linklike" id="print-btn">打印 / 存为 PDF</button>' +
-        '<a class="linklike" href="/admin">管理</a>' +
+        '<a class="linklike" href="edit.html">编辑</a>' +
       '</span>' +
       '</footer>';
 
@@ -165,14 +164,15 @@
     if (basic.name) document.title = basic.name + ' · 个人档案';
   }
 
-  fetch('/api/profile', { headers: { Accept: 'application/json' } })
+  fetch('data.json', { cache: 'no-cache' })
     .then(function (res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     })
     .then(render)
     .catch(function (err) {
-      loading.textContent = '内容读取失败，请稍后刷新重试。';
+      loading.innerHTML = '内容读取失败。请确认 <code>data.json</code> 与页面在同一目录，' +
+        '并且是通过 HTTP 访问（直接双击打开本地文件会被浏览器拦截）。';
       console.error(err);
     });
 })();
