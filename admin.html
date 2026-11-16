@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>后台管理 · 个人档案</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+
+<!-- ---------------- 登录 ---------------- -->
+<div class="login-wrap" id="login-view" hidden>
+  <form class="login-card" id="login-form" novalidate>
+    <h1 class="login-title">后台登录</h1>
+    <p class="login-sub">登录后可编辑个人档案内容。</p>
+
+    <label class="field">
+      <span class="field-label">用户名</span>
+      <input type="text" id="login-user" name="username" autocomplete="username" required>
+    </label>
+
+    <label class="field">
+      <span class="field-label">密码</span>
+      <input type="password" id="login-pass" name="password" autocomplete="current-password" required>
+    </label>
+
+    <p class="form-error" id="login-error" role="alert" hidden></p>
+
+    <button type="submit" class="btn btn-primary btn-block" id="login-submit">登录</button>
+    <p class="login-foot"><a href="/">← 返回前台</a></p>
+  </form>
+</div>
+
+<!-- ---------------- 管理面板 ---------------- -->
+<div class="admin" id="admin-view" hidden>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        个人档案 <span class="brand-sep">/</span> <span class="brand-sub">内容管理</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="who" id="who"></span>
+        <a class="btn btn-ghost btn-sm" href="/" target="_blank" rel="noopener">查看前台</a>
+        <button type="button" class="btn btn-ghost btn-sm" id="change-pass-btn">修改密码</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="logout-btn">退出</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- 侧边导航 -->
+    <nav class="sidenav" id="sidenav">
+      <button type="button" class="nav-item is-active" data-target="basic">基本信息</button>
+      <button type="button" class="nav-item" data-target="education">教育经历</button>
+      <button type="button" class="nav-item" data-target="experience">工作经历</button>
+      <button type="button" class="nav-item" data-target="awards">奖项与荣誉</button>
+      <button type="button" class="nav-item" data-target="skills">专业技能</button>
+      <div class="sidenav-foot">
+        <span id="updated-at"></span>
+      </div>
+    </nav>
+
+    <!-- 内容区 -->
+    <main class="content">
+
+      <!-- 基本信息 -->
+      <section class="panel is-active" data-panel="basic">
+        <div class="panel-head">
+          <h2>基本信息</h2>
+          <p class="panel-desc">展示在前台顶部的姓名、职位、联系方式与个人简介。</p>
+        </div>
+        <form id="basic-form" class="form" novalidate>
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">姓名 <em>必填</em></span>
+              <input type="text" name="name" maxlength="40" required>
+            </label>
+            <label class="field">
+              <span class="field-label">职位 / 一句话定位</span>
+              <input type="text" name="title" maxlength="80" placeholder="例如：前端工程师 · 5 年经验">
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="field-label">个人简介</span>
+            <textarea name="summary" rows="6" maxlength="1500" placeholder="两到四句话说明你的方向、擅长的事和代表性成果。空行分段。"></textarea>
+            <span class="field-hint">空行分段，前台会按段落显示。</span>
+          </label>
+
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">邮箱</span>
+              <input type="email" name="email" maxlength="120" placeholder="name@example.com">
+            </label>
+            <label class="field">
+              <span class="field-label">电话</span>
+              <input type="text" name="phone" maxlength="60" placeholder="138 0000 0000">
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">所在城市</span>
+              <input type="text" name="city" maxlength="60" placeholder="杭州">
+            </label>
+            <label class="field">
+              <span class="field-label">个人网站</span>
+              <input type="text" name="website" maxlength="200" placeholder="example.com">
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label class="field">
+              <span class="field-label">GitHub / 作品链接</span>
+              <input type="text" name="github" maxlength="200" placeholder="github.com/yourname">
+            </label>
+            <label class="field">
+              <span class="field-label">照片地址</span>
+              <input type="text" name="avatar" maxlength="400" placeholder="图片链接，留空则不显示">
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">保存基本信息</button>
+            <span class="save-note" id="basic-note"></span>
+          </div>
+        </form>
+      </section>
+
+      <!-- 教育经历 -->
+      <section class="panel" data-panel="education">
+        <div class="panel-head">
+          <h2>教育经历</h2>
+          <p class="panel-desc">学校、学历、专业与在读时间。</p>
+        </div>
+        <div class="list" id="list-education"></div>
+        <button type="button" class="btn btn-add" data-add="education">+ 添加教育经历</button>
+      </section>
+
+      <!-- 工作经历 -->
+      <section class="panel" data-panel="experience">
+        <div class="panel-head">
+          <h2>工作经历</h2>
+          <p class="panel-desc">公司、职位与工作内容；工作内容每行一条，前台显示为列表。</p>
+        </div>
+        <div class="list" id="list-experience"></div>
+        <button type="button" class="btn btn-add" data-add="experience">+ 添加工作经历</button>
+      </section>
+
+      <!-- 奖项 -->
+      <section class="panel" data-panel="awards">
+        <div class="panel-head">
+          <h2>奖项与荣誉</h2>
+          <p class="panel-desc">按时间从近到远排列；可用上移/下移调整顺序。</p>
+        </div>
+        <div class="list" id="list-awards"></div>
+        <button type="button" class="btn btn-add" data-add="awards">+ 添加奖项</button>
+      </section>
+
+      <!-- 技能 -->
+      <section class="panel" data-panel="skills">
+        <div class="panel-head">
+          <h2>专业技能</h2>
+          <p class="panel-desc">按分组罗列，例如「语言」「框架」「工程」。</p>
+        </div>
+        <div class="list" id="list-skills"></div>
+        <button type="button" class="btn btn-add" data-add="skills">+ 添加技能分组</button>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ---------------- 修改密码 ---------------- -->
+<div class="modal" id="pass-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="pass-title">
+    <h3 id="pass-title">修改密码</h3>
+    <form id="pass-form" class="form" novalidate>
+      <label class="field">
+        <span class="field-label">当前密码</span>
+        <input type="password" name="current" autocomplete="current-password" required>
+      </label>
+      <label class="field">
+        <span class="field-label">新密码 <em>至少 8 位</em></span>
+        <input type="password" name="next" autocomplete="new-password" minlength="8" required>
+      </label>
+      <p class="form-error" id="pass-error" role="alert" hidden></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="pass-cancel">取消</button>
+        <button type="submit" class="btn btn-primary">确认修改</button>
+      </div>
+      <p class="field-hint">修改成功后所有登录会话失效，需要重新登录。</p>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="/admin.js"></script>
+</body>
+</html>

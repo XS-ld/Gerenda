@@ -1,0 +1,362 @@
+/* ------------------------------------------------------------------
+   个人档案 · 前台样式
+   设计说明：以纸面阅读为出发点，主色为墨黑与米白，仅用一处砖红作重点；
+   不使用渐变、玻璃感、彩色卡片和图标堆叠。
+------------------------------------------------------------------ */
+
+:root {
+  --ink: #1b1c1e;
+  --ink-soft: #3f4246;
+  --ink-body: #2c2e31;
+  --muted: #8a857c;
+  --line: #e0dcd2;
+  --line-strong: #cfc9bb;
+  --paper: #fbfaf8;
+  --paper-2: #f4f2ec;
+  --accent: #7c3b2c;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  --font-serif: "Songti SC", "Noto Serif SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-body);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a { color: inherit; }
+
+.loading {
+  padding: 96px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+}
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 72px 44px 96px;
+}
+
+/* ---------------- 头部 ---------------- */
+
+.masthead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 36px;
+  padding-bottom: 30px;
+}
+
+.masthead-main { flex: 1; min-width: 0; }
+
+.portrait {
+  flex-shrink: 0;
+  width: 100px;
+  height: 128px;
+  object-fit: cover;
+  background: var(--paper-2);
+  border: 1px solid var(--line-strong);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+.title-line {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.contact li { position: relative; }
+
+.contact li + li::before {
+  content: "";
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.contact a {
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.contact a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--line-strong);
+}
+
+.summary {
+  margin: 28px 0 0;
+  max-width: 62ch;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+}
+
+.summary p { margin: 0 0 10px; }
+.summary p:last-child { margin-bottom: 0; }
+
+/* ---------------- 分区 ---------------- */
+
+.block {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 24px 32px;
+  padding: 30px 0;
+  border-top: 1px solid var(--line);
+}
+
+.block-title {
+  margin: 0;
+  padding-top: 4px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.block-body { min-width: 0; }
+
+.entry + .entry {
+  margin-top: 26px;
+  padding-top: 26px;
+  border-top: 1px dashed var(--line);
+}
+
+.entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+  flex-wrap: wrap;
+}
+
+.entry-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+
+.entry-period {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.entry-sub {
+  margin: 7px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.entry-note {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink-soft);
+}
+
+.bullets {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.bullets li {
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink-soft);
+}
+
+.bullets li + li { margin-top: 5px; }
+
+.bullets li::marker { color: var(--line-strong); }
+
+/* 奖项：左侧年份列 */
+.award {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 4px 18px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.award:first-child { padding-top: 0; }
+.award:last-child { border-bottom: 0; padding-bottom: 0; }
+
+.award-date {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  padding-top: 2px;
+}
+
+.award-title {
+  font-size: 14.5px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.award-org {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.award-note {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+}
+
+/* 技能 */
+.skill {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 4px 18px;
+  padding: 8px 0;
+}
+
+.skill:first-child { padding-top: 0; }
+
+.skill-group {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  padding-top: 1px;
+}
+
+.skill-items {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink-soft);
+}
+
+.empty {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+/* ---------------- 页脚 ---------------- */
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 44px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.footer-actions {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.linklike {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--line-strong);
+  text-decoration: none;
+}
+
+.linklike:hover { color: var(--accent); }
+
+/* ---------------- 响应式 ---------------- */
+
+@media (max-width: 720px) {
+  .page { padding: 44px 22px 64px; }
+  .name { font-size: 32px; }
+  .masthead { gap: 18px; }
+  .portrait { width: 72px; height: 92px; }
+  /* 窄屏换行时避免分隔圆点落在行首 */
+  .contact { gap: 4px 14px; }
+  .contact li + li::before { display: none; }
+  .block {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 24px 0;
+  }
+  .block-title { padding-top: 0; }
+  .award { grid-template-columns: 1fr; gap: 2px; }
+  .award-date { padding-top: 0; }
+  .skill { grid-template-columns: 1fr; gap: 2px; }
+  .site-footer { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---------------- 打印 ---------------- */
+
+@media print {
+  @page { size: A4; margin: 16mm 15mm; }
+
+  body { background: #fff; font-size: 11.5pt; color: #000; }
+  .page { max-width: none; padding: 0; }
+  .no-print { display: none !important; }
+  .name { font-size: 26pt; }
+  .portrait { width: 26mm; height: 33mm; }
+  .block { break-inside: avoid; page-break-inside: avoid; }
+  .entry { break-inside: avoid; page-break-inside: avoid; }
+  a { text-decoration: none; color: #000; }
+  .summary, .entry-note, .bullets li, .skill-items { color: #1a1a1a; }
+}
